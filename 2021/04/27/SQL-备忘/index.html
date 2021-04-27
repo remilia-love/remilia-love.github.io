@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  
+  <title>SQL注入备忘 - Remilia</title>
+  <meta charset="UTF-8">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  
+  
+
+  <link rel="shortcut icon" href="https://i.loli.net/2021/04/27/p8h9jOAa6eo1sPK.png" type="image/png" />
+  <meta name="description" content="记录一下sql的常见知识">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQL注入备忘">
+<meta property="og:url" content="http://remilia-love.github.io/2021/04/27/SQL-%E5%A4%87%E5%BF%98/index.html">
+<meta property="og:site_name" content="Remilia">
+<meta property="og:description" content="记录一下sql的常见知识">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://remilia-love.github.io/2021/04/27/resources/image/image-20210424105402958.png">
+<meta property="og:image" content="http://remilia-love.github.io/2021/04/27/resources/image/image-20210424131434327.png">
+<meta property="og:image" content="http://remilia-love.github.io/2021/04/27/resources/image/image-20210424132649550.png">
+<meta property="og:image" content="http://remilia-love.github.io/2021/04/27/resources/image/image-20210424144053120.png">
+<meta property="article:published_time" content="2021-04-27T14:52:38.000Z">
+<meta property="article:modified_time" content="2021-04-27T15:34:26.299Z">
+<meta property="article:author" content="gl">
+<meta property="article:tag" content="sql注入">
+<meta property="article:tag" content="web渗透">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://remilia-love.github.io/2021/04/27/resources/image/image-20210424105402958.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/combine/npm/highlight.js@9.15.8/styles/atom-one-dark.css,gh/theme-nexmoe/hexo-theme-nexmoe@latest/source/lib/mdui_043tiny/css/mdui.css,gh/theme-nexmoe/hexo-theme-nexmoe@latest/source/lib/iconfont/iconfont.css,gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css?v=233" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css">
+  
+  <link rel="stylesheet" href="/css/style.css?v=1619537673374">
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body class="mdui-drawer-body-left">
+  
+  <div id="nexmoe-background">
+    <div class="nexmoe-bg" style="background-image: url(https://i.loli.net/2021/04/26/q3tpefxv8FSJPM7.jpg)"></div>
+    <div class="mdui-appbar mdui-shadow-0">
+      <div class="mdui-toolbar">
+        <a mdui-drawer="{target: '#drawer', swipe: true}" title="menu" class="mdui-btn mdui-btn-icon mdui-ripple"><i class="mdui-icon nexmoefont icon-menu"></i></a>
+        <div class="mdui-toolbar-spacer"></div>
+        <!--<a href="javascript:;" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">search</i></a>-->
+        <a href="/" title="gl" class="mdui-btn mdui-btn-icon"><img src="https://i.loli.net/2021/04/27/p8h9jOAa6eo1sPK.png" alt="gl"></a>
+       </div>
+    </div>
+  </div>
+  <div id="nexmoe-header">
+      <div class="nexmoe-drawer mdui-drawer" id="drawer">
+    <div class="nexmoe-avatar mdui-ripple">
+        <a href="/" title="gl">
+            <img src="https://i.loli.net/2021/04/27/p8h9jOAa6eo1sPK.png" alt="gl" alt="gl">
+        </a>
+    </div>
+    <div class="nexmoe-count">
+        <div><span>Articles</span>1</div>
+        <div><span>Tags</span>2</div>
+        <div><span>Categories</span>1</div>
+    </div>
+    <div class="nexmoe-list mdui-list" mdui-collapse="{accordion: true}">
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple" href="/" title="回到首页">
+            <i class="mdui-list-item-icon nexmoefont icon-home"></i>
+            <div class="mdui-list-item-content">
+                回到首页
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple" href="/about.html" title="关于博客">
+            <i class="mdui-list-item-icon nexmoefont icon-info-circle"></i>
+            <div class="mdui-list-item-content">
+                关于博客
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple" href="/PY.html" title="我的朋友">
+            <i class="mdui-list-item-icon nexmoefont icon-unorderedlist"></i>
+            <div class="mdui-list-item-content">
+                我的朋友
+            </div>
+        </a>
+        
+        <a class="nexmoe-list-item mdui-list-item mdui-ripple" href="/archives" title="文章归档">
+            <i class="mdui-list-item-icon nexmoefont icon-container"></i>
+            <div class="mdui-list-item-content">
+                文章归档
+            </div>
+        </a>
+        
+    </div>
+    <aside id="nexmoe-sidebar">
+  
+  <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-search">
+        <form id="search_form" action_e="https://cn.bing.com/search?q=site:nexmoe.com" onsubmit="return search();">
+            <label><input id="search_value" name="q" type="search" placeholder="Search"></label>
+        </form>
+    </div>
+</div>
+  
+  <div class="nexmoe-widget-wrap">
+    <div class="nexmoe-widget nexmoe-social">
+        <a class="mdui-ripple" href="https://space.bilibili.com/158584548" target="_blank" mdui-tooltip="{content: '哔哩哔哩'}" style="color: rgb(231, 106, 141);background-color: rgba(231, 106, 141, .15);">
+            <i class="nexmoefont icon-bilibili"></i>
+        </a><a class="mdui-ripple" href="https://github.com/remilia-love/" target="_blank" mdui-tooltip="{content: 'GitHub'}" style="color: rgb(25, 23, 23);background-color: rgba(25, 23, 23, .15);">
+            <i class="nexmoefont icon-github"></i>
+        </a>
+    </div>
+</div>
+  
+  
+  <div class="nexmoe-widget-wrap">
+    <h3 class="nexmoe-widget-title">Categories</h3>
+    <div class="nexmoe-widget">
+
+      <ul class="category-list">
+
+        
+
+
+        
+
+        
+
+        <li class="category-list-item">
+          <a class="category-list-link" href="/categories/web渗透/">web渗透</a>
+          <span class="category-list-count">1</span>
+        </li>
+
+        
+      </ul>
+
+    </div>
+  </div>
+
+
+  
+  
+  <div class="nexmoe-widget-wrap">
+    <div id="randomtagcloud" class="nexmoe-widget tagcloud nexmoe-rainbow">
+      <a href="/tags/sql%E6%B3%A8%E5%85%A5/" style="font-size: 10px;">sql注入</a> <a href="/tags/web%E6%B8%97%E9%80%8F/" style="font-size: 10px;">web渗透</a>
+    </div>
+    
+  </div>
+
+  
+</aside>
+    <div class="nexmoe-copyright">
+        &copy; 2021 gl
+        Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+        & <a href="https://github.com/theme-nexmoe/hexo-theme-nexmoe" target="_blank">Nexmoe</a>
+        
+    </div>
+</div><!-- .nexmoe-drawer -->
+  </div>
+  <div id="nexmoe-content">
+    <div class="nexmoe-primary">
+        <div class="nexmoe-post">
+
+  <div class="nexmoe-post-right">
+    
+      <div class="nexmoe-fixed">
+        <div class="nexmoe-valign">
+            <div class="nexmoe-toc">
+                
+                
+                  <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%A4%87%E5%BF%98%EF%BC%89SQL%E6%B3%A8%E5%85%A5%E7%9B%B8%E5%85%B3"><span class="toc-number">1.</span> <span class="toc-text">(备忘）SQL注入相关</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MYSQL%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86"><span class="toc-number">1.1.</span> <span class="toc-text">MYSQL相关知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#MYSQL%E5%86%85%E7%BD%AE%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">1.1.1.</span> <span class="toc-text">MYSQL内置数据库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MYSQL%E5%86%85%E7%BD%AE%E5%87%BD%E6%95%B0"><span class="toc-number">1.1.2.</span> <span class="toc-text">MYSQL内置函数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E5%85%A5%E8%BF%87%E7%A8%8B"><span class="toc-number">1.2.</span> <span class="toc-text">注入过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%B3%A8%E5%85%A5"><span class="toc-number">1.2.1.</span> <span class="toc-text">基本注入</span></a></li></ol></li></ol></li></ol>
+                
+            </div>
+        </div>
+      </div>
+    
+  </div>
+
+  <article>
+    
+        <div class="nexmoe-post-cover" style="padding-bottom: NaN%;"> 
+            <img data-src="https://i.loli.net/2021/04/26/rwU1qYvziduGICE.jpg" data-sizes="auto" alt="SQL注入备忘" class="lazyload">
+            <h1>SQL注入备忘</h1>
+        </div>
+    
+    
+    <div class="nexmoe-post-meta nexmoe-rainbow-fill" style="margin:10px 0!important;">
+    <a><i class="nexmoefont icon-calendar-fill"></i>2021年04月27日</a>
+    <a><i class="nexmoefont icon-areachart"></i>654 字</a>
+    <a><i class="nexmoefont icon-time-circle-fill"></i>大概 2 分钟</a>
+</div>
+
+    <p>记录一下sql的常见知识</p>
+<span id="more"></span>
+
+<h1 id="备忘）SQL注入相关"><a href="#备忘）SQL注入相关" class="headerlink" title="(备忘）SQL注入相关"></a>(备忘）SQL注入相关</h1><h2 id="MYSQL相关知识"><a href="#MYSQL相关知识" class="headerlink" title="MYSQL相关知识"></a>MYSQL相关知识</h2><h3 id="MYSQL内置数据库"><a href="#MYSQL内置数据库" class="headerlink" title="MYSQL内置数据库"></a>MYSQL内置数据库</h3><ul>
+<li>information_schema——数据库：存放所有数据库的相关信息<ul>
+<li>schemata——表：存放数据库信息<ul>
+<li>schema_name——字段：存放所有数据库名字</li>
+</ul>
+</li>
+<li>tables——表：存放数据库中表的信息<ul>
+<li>table_name——字段：存放所有表的名字</li>
+<li>table_schema——字段：存放表所属的数据库名字</li>
+</ul>
+</li>
+<li>columns——表：存放数据库中表的字段的信息<ul>
+<li>column_name——字段：存放所有字段名字</li>
+<li>table_name——字段：存放字段所对应的数据表名字</li>
+<li>table_schema——字段：存放表所属的数据库名字</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="MYSQL内置函数"><a href="#MYSQL内置函数" class="headerlink" title="MYSQL内置函数"></a>MYSQL内置函数</h3><ul>
+<li>信息获取类</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>函数名称</th>
+<th>函数功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>system_user()</td>
+<td>系统用户名</td>
+</tr>
+<tr>
+<td>user()</td>
+<td>用户名</td>
+</tr>
+<tr>
+<td>current_user()</td>
+<td>当前用户名</td>
+</tr>
+<tr>
+<td>session_user()</td>
+<td>连接数据库的用户名</td>
+</tr>
+<tr>
+<td>database()</td>
+<td>数据库名</td>
+</tr>
+<tr>
+<td>version()</td>
+<td>数据库版本</td>
+</tr>
+<tr>
+<td>@@datadir</td>
+<td>数据库路径</td>
+</tr>
+<tr>
+<td>@@basedir</td>
+<td>数据库安装路径</td>
+</tr>
+<tr>
+<td>@@version_compile_os</td>
+<td>操作系统</td>
+</tr>
+</tbody></table>
+<ul>
+<li>内容获取类</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>函数名称</th>
+<th>函数功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>count()</td>
+<td>返回执行结果数量</td>
+</tr>
+<tr>
+<td>concat()</td>
+<td>没有分隔符的连接字符</td>
+</tr>
+<tr>
+<td>concat_ws()</td>
+<td>含有分隔符的连接字符</td>
+</tr>
+<tr>
+<td>group_concat()</td>
+<td>连接一个组的所有字符串，并以逗号连接</td>
+</tr>
+<tr>
+<td>load_file()</td>
+<td>读取本地文件</td>
+</tr>
+<tr>
+<td>into outfile</td>
+<td>写文件</td>
+</tr>
+<tr>
+<td>ascii()</td>
+<td>字符串的ASCII代码值</td>
+</tr>
+<tr>
+<td>ord()</td>
+<td>返回字符串的第一个字符的ASCII值</td>
+</tr>
+<tr>
+<td>mid()</td>
+<td>返回字符串的一个部分</td>
+</tr>
+<tr>
+<td>substr()</td>
+<td>返回字符串的一个部分</td>
+</tr>
+<tr>
+<td>length()</td>
+<td>返回字符串的长度</td>
+</tr>
+<tr>
+<td>left()</td>
+<td>返回字符串的最左边几个字符</td>
+</tr>
+<tr>
+<td>floor()</td>
+<td>取整</td>
+</tr>
+<tr>
+<td>extractvalue()</td>
+<td>第一个参数：XML document是 String格式，为XML文档对象的名称，文中为Doc第二个参数：XPath _string （path格式的字符串）作用：从目标XML中返回包含所查询值的字符串</td>
+</tr>
+<tr>
+<td>updatexml()</td>
+<td>第一个参数：XML document是 String格式，为XML文档对象的名称，文中为Doc第二个参数：XPath _string∝ Xpath格式的字符串）第三个参数：new value, String格式，替换查找到的符合条件的数据。作用：改变文档中符合条件的节点的值</td>
+</tr>
+<tr>
+<td>char()</td>
+<td>返回整数ASC代码字符组成的字符串</td>
+</tr>
+</tbody></table>
+<ul>
+<li>逻辑类与其他</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>函数名称</th>
+<th>函数功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>if()</td>
+<td>if(条件，为真，为假)</td>
+</tr>
+<tr>
+<td>sleep()</td>
+<td>阻塞x秒</td>
+</tr>
+<tr>
+<td>rand()</td>
+<td>返回0，1之间随机数</td>
+</tr>
+<tr>
+<td>STRCMP()</td>
+<td>比较字符串内容</td>
+</tr>
+<tr>
+<td>IFNULL()</td>
+<td>IFNULL(是否是NULL?，真，假)</td>
+</tr>
+</tbody></table>
+<h2 id="注入过程"><a href="#注入过程" class="headerlink" title="注入过程"></a>注入过程</h2><h3 id="基本注入"><a href="#基本注入" class="headerlink" title="基本注入"></a>基本注入</h3><ul>
+<li><p>union连接的语句只有最后一个select允许有order by 或limit</p>
+</li>
+<li><p>limit 从第几条开始，查看几条</p>
+</li>
+<li><p>报错注入：</p>
+<ul>
+<li>应用场景：不回显内容，但会打印错误信息</li>
+<li><img data-fancybox="gallery" data-sizes="auto" data-src="../resources/image/image-20210424105402958.png" alt="image-20210424105402958" class="lazyload"></li>
+</ul>
+</li>
+<li><p>布尔盲注方法：<img data-fancybox="gallery" data-sizes="auto" data-src="../resources/image/image-20210424131434327.png" alt="image-20210424131434327" class="lazyload"></p>
+</li>
+<li><p>regexp使用：<img data-fancybox="gallery" data-sizes="auto" data-src="../resources/image/image-20210424132649550.png" alt="image-20210424132649550" class="lazyload"></p>
+</li>
+<li><p>时间盲注方法：</p>
+<p><img data-fancybox="gallery" data-sizes="auto" data-src="../resources/image/image-20210424144053120.png" alt="image-20210424144053120" class="lazyload"></p>
+</li>
+</ul>
+
+  </article>
+
+  
+    
+  <div class="nexmoe-post-copyright">
+    <strong>Author：</strong>gl<br>
+    <strong>Link：</strong><a href="http://remilia-love.github.io/2021/04/27/SQL-%E5%A4%87%E5%BF%98/" title="http:&#x2F;&#x2F;remilia-love.github.io&#x2F;2021&#x2F;04&#x2F;27&#x2F;SQL-%E5%A4%87%E5%BF%98&#x2F;" target="_blank" rel="noopener">http:&#x2F;&#x2F;remilia-love.github.io&#x2F;2021&#x2F;04&#x2F;27&#x2F;SQL-%E5%A4%87%E5%BF%98&#x2F;</a><br>
+    
+      <strong>版权声明：</strong>本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/cn/deed.zh" target="_blank">CC BY-NC-SA 3.0 CN</a> 协议进行许可
+    
+  </div>
+
+
+  
+  
+  <div class="nexmoe-post-meta nexmoe-rainbow">
+    
+        <a class="nexmoefont icon-appstore-fill -link" href="/categories/web%E6%B8%97%E9%80%8F/">web渗透</a>
+    
+    
+        <a class="nexmoefont icon-tag-fill -none-link" href="/tags/sql%E6%B3%A8%E5%85%A5/" rel="tag">sql注入</a> <a class="nexmoefont icon-tag-fill -none-link" href="/tags/web%E6%B8%97%E9%80%8F/" rel="tag">web渗透</a>
+    
+</div>
+
+  <div class="nexmoe-post-footer">
+    <section class="nexmoe-comment">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.5.0/dist/gitalk.min.css">
+<div id="gitalk"></div>
+<script src="https://cdn.jsdelivr.net/npm/gitalk@1.5.0/dist/gitalk.min.js"></script>
+<script type="text/javascript">
+    var gitalk = new Gitalk({
+        clientID: '80b2453b6d5f37ad6225',
+        clientSecret: '43e99fa852795c9a7b3eb924b2558c64b84bbdeb',
+        id: window.location.pathname,
+        repo: 'nexmoe.github.io',
+        owner: 'nexmoe',
+        admin: 'nexmoe'
+    })
+    gitalk.render('gitalk')
+</script>
+</section>
+  </div>
+</div>
+        <!--<div class="nexmoe-post-right">
+          <div class="nexmoe-fixed">
+            <div class="nexmoe-tool">
+              <a href="#nexmoe-content" class="toc-link" aria-label="回到顶部" title="top"><button class="mdui-fab mdui-ripple"><i class="nexmoefont icon-caret-top"></i></button></a>
+            </div>
+          </div>
+        </div>-->
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/combine/npm/lazysizes@5.1.0/lazysizes.min.js,gh/highlightjs/cdn-release@9.15.8/build/highlight.min.js,npm/mdui@0.4.3/dist/js/mdui.min.js?v=1"></script>
+<script>
+	hljs.initHighlightingOnLoad();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/gh/xtaodada/xtaodada.github.io@0.0.2/copy.js"></script>
+ 
+
+<script src="/js/app.js?v=1619537673375"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js"></script>
+<script>
+	$(".justified-gallery").justifiedGallery({
+		rowHeight: 160,
+		margins: 10,
+	});
+</script>
+
+  
+
+
+
+
+
+</body>
+
+</html>
